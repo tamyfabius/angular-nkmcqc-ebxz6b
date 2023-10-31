@@ -363,8 +363,8 @@ export class PolicyComparisonFacade {
       other: string;
     }> = [];
 
-    // route of the 1st action
-    for (const action1 in data) {
+     // route of the 1st action
+     for (const action1 in data) {
       switch (data[action1] instanceof Array) {
         // securityrule sections groups are added or removed or reordered
         case true:
@@ -375,171 +375,71 @@ export class PolicyComparisonFacade {
                 securityRuleAdded += '"' + data[action1][securityRule] + '"\n';
                 break;
               case 'removed':
-                securityRuleRemoved +=
-                  '"' + data[action1][securityRule] + '"\n';
+                securityRuleRemoved += '"' + data[action1][securityRule] + '"\n';
                 break;
               case 'reordered':
-                securityRuleReordered +=
-                  '"' + data[action1][securityRule] + '"\n';
+                securityRuleReordered += '"' + data[action1][securityRule] + '"\n';
                 break;
-              default:
-                console.error(`${action1}: 1st action error`);
-                break;
+              default: console.error(`${action1}: 1st action error`); break;
             }
           }
           // COLUMN 1 : action1
           // COLUMN 2 : securityRuleAdded OR securityRuleRemoved OR securityRuleReordered
           if (securityRuleAdded !== '') {
-            const objTemp = {
-              action1,
-              securityRuleAdded,
-              '',
-              '',
-              '',
-              '',
-              '',
-              ''
-            };
-            res.push(objTemp);
-            /*this.addSecurityRuleGroupElement(
-              action1,
-              securityRuleAdded,
-              '',
-              '',
-              '',
-              '',
-              '',
-              ''
-            );
-            securityRuleAdded = '';*/
+            this.addSecurityRuleGroupElement(action1, securityRuleAdded, '', '', '', '', '', '')
+            securityRuleAdded = '';
           }
           if (securityRuleRemoved !== '') {
-            this.addSecurityRuleGroupElement(
-              action1,
-              securityRuleRemoved,
-              '',
-              '',
-              '',
-              '',
-              '',
-              ''
-            );
+            this.addSecurityRuleGroupElement(action1, securityRuleRemoved, '', '', '', '', '', '')
             securityRuleRemoved = '';
           }
           if (securityRuleReordered !== '') {
-            this.addSecurityRuleGroupElement(
-              action1,
-              securityRuleReordered,
-              '',
-              '',
-              '',
-              '',
-              '',
-              ''
-            );
+            this.addSecurityRuleGroupElement(action1, securityRuleReordered, '', '', '', '', '', '')
             securityRuleReordered = '';
           }
           break;
+
         // securityrule sections groups are modified
         case false:
           // route of the section id
           for (const sectionId in data.modified) {
-            if (
-              data.modified[sectionId].modified.description !== undefined &&
-              data.modified[sectionId].modified.description !== ''
-            ) {
+            if (data.modified[sectionId].modified.description !== undefined
+              && data.modified[sectionId].modified.description !== '') {
               otherList += `section description: ${data.modified[sectionId].modified.description}\n`;
             }
             // route of the 2nd action
             for (const action2 in data.modified[sectionId].modified.members) {
-              switch (
-                data.modified[sectionId].modified.members[action2] instanceof
-                Array
-              ) {
+              switch (data.modified[sectionId].modified.members[action2] instanceof Array) {
                 // rule tag are added or removed or reordered
                 case true:
                   //all ruletags with the same action are in the same row
                   for (const ruletag in data.modified[sectionId].modified.members[action2]) {
                     switch (action2) {
                       case 'added':
-                        securityRuleAdded +=
-                          '"' +
-                          data.modified[sectionId].modified.members[action2][
-                            ruletag
-                          ] +
-                          '"\n';
+                        securityRuleAdded += '"' + data.modified[sectionId].modified.members[action2][ruletag] + '"\n';
                         break;
                       case 'removed':
-                        securityRuleRemoved +=
-                          '"' +
-                          data.modified[sectionId].modified.members[action2][
-                            ruletag
-                          ] +
-                          '"\n';
+                        securityRuleRemoved += '"' + data.modified[sectionId].modified.members[action2][ruletag] + '"\n';
                         break;
                       case 'reordered':
-                        securityRuleReordered +=
-                          '"' +
-                          data.modified[sectionId].modified.members[action2][
-                            ruletag
-                          ] +
-                          '"\n';
+                        securityRuleReordered += '"' + data.modified[sectionId].modified.members[action2][ruletag] + '"\n';
                         break;
-                      default:
-                        console.error(`${action2}: 2nd action error`);
-                        break;
+                      default: console.error(`${action2}: 2nd action error`); break;
                     }
                   }
                   // COLUMN 1 : action2
                   // COLUMN 2 : sectionId
                   // COLUMN 3 : securityRuleAdded or securityRuleRemoved or securityRuleReordered
                   if (securityRuleAdded !== '') {
-                    res = {
-                      action2,
-                      sectionId,
-                      securityRuleAdded,
-                      '',
-                      '',
-                      '',
-                      '',
-                      otherList
-                    };
-                    this.addSecurityRuleGroupElement(
-                      action2,
-                      sectionId,
-                      securityRuleAdded,
-                      '',
-                      '',
-                      '',
-                      '',
-                      otherList
-                    );
+                    this.addSecurityRuleGroupElement(action2, sectionId, securityRuleAdded, '', '', '', '', otherList)
                     securityRuleAdded = '';
                   }
                   if (securityRuleRemoved !== '') {
-                    this.addSecurityRuleGroupElement(
-                      action2,
-                      sectionId,
-                      securityRuleRemoved,
-                      '',
-                      '',
-                      '',
-                      '',
-                      otherList
-                    );
+                    this.addSecurityRuleGroupElement(action2, sectionId, securityRuleRemoved, '', '', '', '', otherList)
                     securityRuleRemoved = '';
                   }
                   if (securityRuleReordered !== '') {
-                    this.addSecurityRuleGroupElement(
-                      action2,
-                      sectionId,
-                      securityRuleReordered,
-                      '',
-                      '',
-                      '',
-                      '',
-                      otherList
-                    );
+                    this.addSecurityRuleGroupElement(action2, sectionId, securityRuleReordered, '', '', '', '', otherList)
                     securityRuleReordered = '';
                   }
                   otherList = '';
@@ -548,147 +448,68 @@ export class PolicyComparisonFacade {
                 // rule tag are modified
                 case false:
                   // route of the rule tags
-                  for (const ruletag in data.modified[sectionId].modified
-                    .members.modified) {
+                  for (const ruletag in data.modified[sectionId].modified.members.modified) {
                     // route of the parameters
-                    for (const parameter in data.modified[sectionId].modified
-                      .members.modified[ruletag].modified) {
+                    for (const parameter in data.modified[sectionId].modified.members.modified[ruletag].modified) {
                       switch (parameter) {
                         case 'sources':
                           // route of the 3rd action
-                          for (const action3 in data.modified[sectionId]
-                            .modified.members.modified[ruletag].modified[
-                            parameter
-                          ]) {
+                          for (const action3 in data.modified[sectionId].modified.members.modified[ruletag].modified[parameter]) {
                             sourcesString += `${action3}:\n`;
-                            for (const parameterDetails in data.modified[
-                              sectionId
-                            ].modified.members.modified[ruletag].modified[
-                              parameter
-                            ][action3]) {
+                            for (const parameterDetails in data.modified[sectionId].modified.members.modified[ruletag].modified[parameter][action3]) {
                               sourcesString += `${data.modified[sectionId].modified.members.modified[ruletag].modified[parameter][action3][parameterDetails]}\n`;
                             }
                           }
                           break;
                         case 'destinations':
                           // route of the 3rd action
-                          for (const action3 in data.modified[sectionId]
-                            .modified.members.modified[ruletag].modified[
-                            parameter
-                          ]) {
+                          for (const action3 in data.modified[sectionId].modified.members.modified[ruletag].modified[parameter]) {
                             destinationsString += `${action3}:\n`;
-                            for (const parameterDetails in data.modified[
-                              sectionId
-                            ].modified.members.modified[ruletag].modified[
-                              parameter
-                            ][action3]) {
+                            for (const parameterDetails in data.modified[sectionId].modified.members.modified[ruletag].modified[parameter][action3]) {
                               destinationsString += `${data.modified[sectionId].modified.members.modified[ruletag].modified[parameter][action3][parameterDetails]}\n`;
                             }
                           }
                           break;
                         case 'channels':
                           // route of the 3rd action
-                          for (const action3 in data.modified[sectionId]
-                            .modified.members.modified[ruletag].modified[
-                            parameter
-                          ]) {
+                          for (const action3 in data.modified[sectionId].modified.members.modified[ruletag].modified[parameter]) {
                             channelsString += `${action3}:\n`;
-                            for (const parameterDetails in data.modified[
-                              sectionId
-                            ].modified.members.modified[ruletag].modified[
-                              parameter
-                            ][action3]) {
-                              if (
-                                typeof data.modified[sectionId].modified.members
-                                  .modified[ruletag].modified[parameter][
-                                  action3
-                                ][parameterDetails] === 'string'
-                              ) {
+                            for (const parameterDetails in data.modified[sectionId].modified.members.modified[ruletag].modified[parameter][action3]) {
+                              if (typeof data.modified[sectionId].modified.members.modified[ruletag].modified[parameter][action3][parameterDetails] === 'string') {
                                 channelsString += `${data.modified[sectionId].modified.members.modified[ruletag].modified[parameter][action3][parameterDetails]}\n`;
-                              } else if (
-                                typeof data.modified[sectionId].modified.members
-                                  .modified[ruletag].modified[parameter][
-                                  action3
-                                ][parameterDetails] === 'object'
-                              ) {
-                                channelsString += `${JSON.stringify(
-                                  data.modified[sectionId].modified.members
-                                    .modified[ruletag].modified[parameter][
-                                    action3
-                                  ][parameterDetails]
-                                )}\n`;
-                              } else {
-                                console.error(
-                                  `typing error: ${typeof data.modified[
-                                    sectionId
-                                  ].modified.members.modified[ruletag].modified[
-                                    parameter
-                                  ][action3][
-                                    parameterDetails
-                                  ]} is not a valid type`
-                                );
-                              }
+                              } else if (typeof data.modified[sectionId].modified.members.modified[ruletag].modified[parameter][action3][parameterDetails] === 'object') {
+                                channelsString += `${JSON.stringify(data.modified[sectionId].modified.members.modified[ruletag].modified[parameter][action3][parameterDetails])}\n`;
+                              } else { console.error(`typing error: ${typeof data.modified[sectionId].modified.members.modified[ruletag].modified[parameter][action3][parameterDetails]} is not a valid type`); }
                             }
                           }
                           break;
-                        case 'scope':
-                        case 'scopes':
+                        case 'scope': case 'scopes':
                           // route of the 3rd action
-                          for (const action3 in data.modified[sectionId]
-                            .modified.members.modified[ruletag].modified[
-                            parameter
-                          ]) {
+                          for (const action3 in data.modified[sectionId].modified.members.modified[ruletag].modified[parameter]) {
                             scopeString += `${action3}:\n`;
-                            scopeString;
-                            for (const parameterDetails in data.modified[
-                              sectionId
-                            ].modified.members.modified[ruletag].modified[
-                              parameter
-                            ][action3]) {
+                            scopeString
+                            for (const parameterDetails in data.modified[sectionId].modified.members.modified[ruletag].modified[parameter][action3]) {
                               scopeString += `${data.modified[sectionId].modified.members.modified[ruletag].modified[parameter][action3][parameterDetails]}\n`;
                             }
                           }
                           break;
-                        case 'description':
-                        case 'disabled':
-                        case 'logged':
-                          if (
-                            data.modified[sectionId].modified.members.modified[
-                              ruletag
-                            ].modified.description !== '' &&
-                            data.modified[sectionId].modified.members.modified[
-                              ruletag
-                            ].modified.description !== undefined
-                          ) {
+                        case 'description': case 'disabled': case 'logged':
+                          if (data.modified[sectionId].modified.members.modified[ruletag].modified.description !== ''
+                            && data.modified[sectionId].modified.members.modified[ruletag].modified.description !== undefined) {
                             otherList += `rule description: ${data.modified[sectionId].modified.members.modified[ruletag].modified.description}\n`;
                           }
-                          if (
-                            data.modified[sectionId].modified.members.modified[
-                              ruletag
-                            ].modified.disabled !== '' &&
-                            data.modified[sectionId].modified.members.modified[
-                              ruletag
-                            ].modified.disabled !== undefined
-                          ) {
+                          if (data.modified[sectionId].modified.members.modified[ruletag].modified.disabled !== ''
+                            && data.modified[sectionId].modified.members.modified[ruletag].modified.disabled !== undefined) {
                             otherList += `disabled: ${data.modified[sectionId].modified.members.modified[ruletag].modified.disabled}\n`;
                           }
-                          if (
-                            data.modified[sectionId].modified.members.modified[
-                              ruletag
-                            ].modified.logged !== '' &&
-                            data.modified[sectionId].modified.members.modified[
-                              ruletag
-                            ].modified.logged !== undefined
-                          ) {
+                          if (data.modified[sectionId].modified.members.modified[ruletag].modified.logged !== ''
+                            && data.modified[sectionId].modified.members.modified[ruletag].modified.logged !== undefined) {
                             otherList += `logged: ${data.modified[sectionId].modified.members.modified[ruletag].modified.logged}\n`;
                           }
                           break;
-                        default:
-                          console.error(
-                            `error: ${parameter} is not a valid parameter`
-                          );
-                          break;
+                        default: console.error(`error: ${parameter} is not a valid parameter`); break;
                       }
+
                     }
                     // COLUMN 1 : action2
                     // COLUMN 2 : sectionId
@@ -698,16 +519,7 @@ export class PolicyComparisonFacade {
                     // COLUMN 6 : channelsString
                     // COLUMN 7 : scopeString
                     // COLUMN 8 : otherList
-                    this.addSecurityRuleGroupElement(
-                      action2,
-                      sectionId,
-                      ruletag,
-                      sourcesString,
-                      destinationsString,
-                      channelsString,
-                      scopeString,
-                      otherList
-                    );
+                    this.addSecurityRuleGroupElement(action2, sectionId, ruletag, sourcesString, destinationsString, channelsString, scopeString, otherList);
                     sourcesString = '';
                     destinationsString = '';
                     channelsString = '';
@@ -715,23 +527,14 @@ export class PolicyComparisonFacade {
                     otherList = '';
                   }
                   break;
-                default:
-                  console.error(
-                    `error: ${
-                      data.modified[sectionId].modified.members
-                        .action2 instanceof Array
-                    } is not a boolean`
-                  );
-                  break;
+                default: console.error(`error: ${data.modified[sectionId].modified.members.action2 instanceof Array} is not a boolean`); break;
               }
+
             }
           }
           break;
-        default:
-          console.error(
-            `error: ${data[action1] instanceof Array} is not a boolean`
-          );
-          break;
+
+        default: console.error(`error: ${this.data[action1] instanceof Array} is not a boolean`); break;
       }
     }
   }
