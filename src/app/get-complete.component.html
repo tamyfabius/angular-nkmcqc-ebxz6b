@@ -1,0 +1,8 @@
+<button class="btn btn-primary" (click)="GetProducts()">Get Products</button>
+<div *ngFor="let item of result | async">
+  {{ item | json }}
+</div>
+
+<div *ngFor="let item2 of result2 | async">
+  {{ item2 | json }}
+</div>
