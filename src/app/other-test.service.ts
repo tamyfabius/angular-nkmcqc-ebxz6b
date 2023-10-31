@@ -538,4 +538,53 @@ export class PolicyComparisonFacade {
       }
     }
   }
+
+  function resetAndAddElementIfNotEmpty(string, ...args) {
+    if (string !== '') {
+      this.addSecurityRuleGroupElement(...args, string);
+      return '';
+    }
+    return string;
+  }
+  
+  function handleAction(action, value, targetString) {
+    if (['added', 'removed', 'reordered'].includes(action)) {
+      return targetString += `"${value}"\n`;
+    } else {
+      console.error(`${action}: action error`);
+      return targetString;
+    }
+  }
+  
+  function processSecurityRules(action, securityRules) {
+    let securityRuleAdded = '', securityRuleRemoved = '', securityRuleReordered = '';
+    
+    for (const rule of securityRules) {
+      securityRuleAdded = handleAction(action, rule, securityRuleAdded);
+      securityRuleRemoved = handleAction(action, rule, securityRuleRemoved);
+      securityRuleReordered = handleAction(action, rule, securityRuleReordered);
+    }
+  
+    securityRuleAdded = resetAndAddElementIfNotEmpty(securityRuleAdded, action);
+    securityRuleRemoved = resetAndAddElementIfNotEmpty(securityRuleRemoved, action);
+    securityRuleReordered = resetAndAddElementIfNotEmpty(securityRuleReordered, action);
+  }
+  
+  function processModifiedSections(modifiedSections) {
+    // À compléter...
+    // Cette fonction devrait gérer la logique pour les sections modifiées, 
+    // comme le code qui existe actuellement dans le `case false` pour `data[action1] instanceof Array`.
+  }
+  
+  function mainFunction(data) {
+    for (const action1 in data) {
+      if (data[action1] instanceof Array) {
+        processSecurityRules(action1, data[action1]);
+      } else if (typeof data[action1] === 'object' && data[action1].modified) {
+        processModifiedSections(data[action1].modified);
+      } else {
+        console.error(`error: ${typeof data[action1]} is not a valid type`);
+      }
+    }
+  }
 }
