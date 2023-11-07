@@ -1,84 +1,194 @@
-// Define interfaces to improve type safety and readability
-interface ChannelParameter {
-  port?: string;
-  ports?: string[];
-  protocol?: string;
-  code?: string;
-  type?: string;
-  description?: string;
-}
-
-interface ChannelGroupAction {
+buildWorkloadGroupData(data: any): Array<{
   action: string;
-  channelId: string;
+  workloadId: string;
   typeId: string;
-  parameters: string;
-}
+  member: string;
+}> {
+  /*
+  WorkloadGroup data format:
 
-/**
- * Process channel group data into a formatted array.
- * @param data The raw input data to process.
- * @returns A formatted array of channel group actions.
- */
-buildChannelGroupData(data: any): ChannelGroupAction[] {
-  // Initialize the result array
-  const result: ChannelGroupAction[] = [];
+    - Changing the type of a workload
+    "workloadId": {
+        "modified": {
+          "type": ""
 
-  // Helper function to process parameters
-  const extractParameters = (parameters: ChannelParameter) => {
-    return Object.entries(parameters)
-      .filter(([, value]) => value !== undefined && value !== '')
-      .map(([key, value]) => {
-        if (Array.isArray(value)) {
-          return `${key}: ${value.join(' ')}`;
-        }
-        return `${key}: ${value}`;
-      })
-      .join('\n');
-  };
+    - Static :
+    "workloadId": {
+      "modified": {
+        "members": {
+          "action": [ // added, removed, reordered
+            ""
 
-  // Helper function to build an object for the result array
-  const buildChannelGroupObject = (
-    action: string,
-    channelId: string,
-    typeId: string,
-    parameters: string
-  ): ChannelGroupAction => ({
-    action,
-    channelId,
-    typeId,
-    parameters,
-  });
-
-  // Process the data
-  Object.entries(data).forEach(([action, channelData]) => {
-    if (Array.isArray(channelData)) {
-      // Handle added, removed, or reordered channel groups
-      const channelGroups = channelData.join('"\n"');
-      result.push(buildChannelGroupObject(action, channelGroups, 'channelGroup', ''));
-    } else {
-      // Handle modified channels or channel groups
-      Object.entries(channelData).forEach(([channelId, { modified }]) => {
-        if (modified.members) {
-          // Handle modified channel groups
-          Object.entries(modified.members).forEach(([memberAction, members]) => {
-            if (typeof members === 'string') {
-              // Handle modified channel list
-              result.push(buildChannelGroupObject(memberAction, channelId, 'channelGroup', members));
-            } else {
-              // Handle modified parameters
-              const parameters = extractParameters(members as ChannelParameter);
-              result.push(buildChannelGroupObject(memberAction, channelId, 'channelGroup', parameters));
+    - Dynamic :
+    "workloadId": {
+      "modified": {
+        "dynamic_members": {
+          "action": [ // added, removed, reordered
+            {
+              "operator": ""
+              "members": [
+                {
+                  "key": "",
+                  "operator": "",
+                  "value": ""
+                },
+              ],
             }
-          });
-        } else if (modified.channel) {
-          // Handle modified individual channels
-          const parameters = extractParameters(modified.channel);
-          result.push(buildChannelGroupObject('modified', channelId, 'channel', parameters));
-        }
-      });
-    }
-  });
+            {
+              "key": "",
+              "operator": "",
+              "value": ""
+            }
+          ],
 
+    - Complex :
+    "workloadId": {
+      "modified": {
+        "group_members": {
+          "action": [ // added, removed, reordered
+            ""
+
+  Formatting in a table: 4 columns
+  ------------------------------------------------------------------------------------------------------------------------
+  | action | workloadId | typeId (static/dynamic/complex) | member (json after "workloadId": { "modified": {"group_type":) |
+  ------------------------------------------------------------------------------------------------------------------------
+  */
+  let workloadAdded = '';
+  let workloadRemoved = '';
+  let workloadReordered = '';
+  let typeWorkload = '';
+  let memberWorkload = '';
+  const result: Array<{
+    action: string;
+    workloadId: string;
+    typeId: string;
+    member: string;
+  }> = [];
+
+  // route of the 1st action
+  // eslint-disable-next-line guard-for-in
+  for (const action1 in data) {
+    if (data[action1] instanceof Array) {
+      // workload groups are added or removed or reordered
+      // all workload groups with the same action are in the same row
+      // eslint-disable-next-line guard-for-in
+      for (const workload in data[action1]) {
+        switch (action1) {
+          case 'added':
+            workloadAdded += '"' + data[action1][workload] + '"\n';
+            break;
+          case 'removed':
+            workloadRemoved += '"' + data[action1][workload] + '"\n';
+            break;
+          case 'reordered':
+            workloadReordered += '"' + data[action1][workload] + '"\n';
+            break;
+          default:
+            console.error(`${action1}: 1st action error`);
+            break;
+        }
+      }
+      // COLUMN 1 : action1
+      // COLUMN 2 : workloadAdded OR workloadRemoved OR workloadReordered
+      if (workloadAdded !== '') {
+        result.push(
+          this.buildWorkloadGroupObject(action1, workloadAdded, '', '')
+        );
+        workloadAdded = '';
+      }
+      if (workloadRemoved !== '') {
+        result.push(
+          this.buildWorkloadGroupObject(action1, workloadRemoved, '', '')
+        );
+        workloadRemoved = '';
+      }
+      if (workloadReordered !== '') {
+        result.push(
+          this.buildWorkloadGroupObject(action1, workloadReordered, '', '')
+        );
+        workloadReordered = '';
+      }
+    } else if (typeof data[action1] === 'object') {
+      //workload groups are modified
+      // route of the workload Id
+      // eslint-disable-next-line guard-for-in
+      for (const workloadId in data[action1]) {
+        // route of the workload type
+        // eslint-disable-next-line guard-for-in
+        for (const typeId in data[action1][workloadId].modified) {
+          // define type of workload
+          switch (typeId) {
+            case 'members':
+              typeWorkload = 'static';
+              break;
+            case 'dynamic_members':
+              typeWorkload = 'dynamic';
+              break;
+            case 'group_members':
+              typeWorkload = 'complex';
+              break;
+            default:
+              if (typeId !== 'description' && typeId !== 'type') {
+                console.error(`${typeId} is not a type of workload`);
+              }
+              break;
+          }
+        }
+        // define member to display
+        if (
+          data[action1][workloadId].modified.description !== undefined ||
+          data[action1][workloadId].modified.description !== '' ||
+          data[action1][workloadId].modified.type !== undefined ||
+          data[action1][workloadId].modified.type !== ''
+        ) {
+          memberWorkload = JSON.stringify(
+            data[action1][workloadId].modified,
+            undefined,
+            '\t'
+          );
+        } else if (data[action1][workloadId].modified.members !== undefined) {
+          memberWorkload = JSON.stringify(
+            data[action1][workloadId].modified.members,
+            undefined,
+            '\t'
+          );
+        } else if (
+          data[action1][workloadId].modified.dynamic_members !== undefined
+        ) {
+          memberWorkload = JSON.stringify(
+            data[action1][workloadId].modified.dynamic_members,
+            undefined,
+            '\t'
+          );
+        } else if (
+          data[action1][workloadId].modified.group_members !== undefined
+        ) {
+          memberWorkload = JSON.stringify(
+            data[action1][workloadId].modified.group_members,
+            undefined,
+            '\t'
+          );
+        }
+        // COLUMN 1 : action1
+        // COLUMN 2 : workloadId
+        // COLUMN 3 : typeWorkload
+        // COLUMN 4 : memberWorkload
+        result.push(
+          this.buildWorkloadGroupObject(
+            action1,
+            workloadId,
+            typeWorkload,
+            memberWorkload.slice(1, memberWorkload.length - 2)
+          )
+        );
+        typeWorkload = '';
+        memberWorkload = '';
+      }
+    } else {
+      console.error(
+        `error: ${data[action1] instanceof Array} is not a boolean`
+      );
+    }
+  }
   return result;
 }
