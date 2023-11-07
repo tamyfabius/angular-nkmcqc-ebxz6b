@@ -1,72 +1,60 @@
-import { ResolveFn, Router } from '@angular/router';
-import { inject } from '@angular/core';
-import {
-  PolicyComparisonFacade,
-  PolicyComparisonFormModel,
-  PolicyComparisonModel,
-  StoredPolicyModel,
-} from '@skynes/firewalls/domain';
-import { concatMap, map, Observable } from 'rxjs';
-import { RxFormGroup } from '@rxweb/reactive-form-validators';
+export class PolicyComparisonComponent implements OnInit {
+  readonly #policyComparisonFacade = inject(PolicyComparisonFacade);
+  firewalls: FirewallModel[] = [];
+  storedPolicies: StoredPolicyModel[] = [];
+  policyComparisonForm!: RxFormGroup;
+  cols: IColumn[] = this.#policyComparisonFacade.initColumns();
+  chanelGroupList$ = new BehaviorSubject<any[]>([]);
+  securityRuleGroupList$ = new BehaviorSubject<any[]>([]);
+  workloadGroupList$ = new BehaviorSubject<any[]>([]);
+  loadingPolicsyComparisonResult$ = new BehaviorSubject<boolean>(false);
 
-export const policyComparisonResolver: ResolveFn<any> = (route, state) => {
-  const routerState = inject(Router)?.getCurrentNavigation()?.extras?.state;
-  const policyComparisonFacade = inject(PolicyComparisonFacade);
-  const storedPolicyId = routerState ? (routerState['id'] as string) : null;
-  const firewallId = routerState ? (routerState['firewallId'] as string) : null;
-  const firewalls$ = policyComparisonFacade.firewalls$;
-  const policyComparisonFrom: PolicyComparisonModel =
-    new PolicyComparisonModel();
-  const policyComparisonTo: PolicyComparisonModel = new PolicyComparisonModel();
-  const policyComparisonFormObj: PolicyComparisonFormModel =
-    new PolicyComparisonFormModel();
+  constructor(private route: ActivatedRoute) {}
 
-  let data$!: Observable<any>;
-  if (storedPolicyId) {
-    data$ = policyComparisonFacade.getStoredPolicies(firewallId as string).pipe(
-      concatMap((storedPolicies) =>
-        firewalls$.pipe(
-          map((firewalls) => {
-            let policyComparisonForm!: RxFormGroup;
-            const storedPolicy = policyComparisonFacade.findClosestLowerObject(
-              Number(storedPolicyId),
-              storedPolicies
-            ) as StoredPolicyModel;
-            if (storedPolicy.firewall_id && storedPolicy.id) {
-              policyComparisonFormObj.comparisonFrom.firewallId =
-                firewallId as string;
-              policyComparisonFormObj.comparisonFrom.storedPolicyId =
-                storedPolicyId as string;
-              policyComparisonFormObj.comparisonTo.firewallId =
-                storedPolicy.firewall_id as string;
-              policyComparisonFormObj.comparisonTo.storedPolicyId =
-                storedPolicy.id as unknown as string;
-
-              policyComparisonFrom.firewallId = firewallId as string;
-              policyComparisonFrom.storedPolicyId = storedPolicyId as string;
-              policyComparisonTo.firewallId =
-                storedPolicy.firewall_id as string;
-              policyComparisonTo.storedPolicyId =
-                storedPolicy.id as unknown as string;
-            }
-            if (
-              policyComparisonFormObj.comparisonFrom.storedPolicyId &&
-              policyComparisonFormObj.comparisonTo.storedPolicyId
-            ) {
-              policyComparisonForm =
-                policyComparisonFacade.buildPolicyComparisonForm(
-                  policyComparisonFormObj
-                );
-            }
-            return {
-              firewalls,
-              storedPolicies,
-              policyComparisonForm,
-            };
-          })
-        )
-      )
-    );
+  ngOnInit(): void {
+    const data = this.route.snapshot.data['data'];
+    if (data) {
+      this.firewalls = data.firewalls;
+      this.storedPolicies = data.storedPolicies;
+      this.policyComparisonForm = data.policyComparisonForm;
+    }
   }
-  return storedPolicyId && firewallId ? data$ : null;
-};
+
+  /**
+   * @function onPolicyComparison
+   */
+  onPolicyComparison(): void {
+    this.loadingPolicsyComparisonResult$.next(true);
+    this.#policyComparisonFacade
+      .policyComparison(
+        this.policyComparisonForm.modelInstance as PolicyComparisonFormModel
+      )
+      .pipe(finalize(() => this.loadingPolicsyComparisonResult$.next(false)))
+      .subscribe((res) => {
+        this.chanelGroupList$.next(
+          this.#policyComparisonFacade.buildChannelGroupData(
+            res['ChannelGroup']
+          )
+        );
+        this.securityRuleGroupList$.next(
+          this.#policyComparisonFacade.buildSecurityRuleGroupData(
+            res['SecurityRuleGroup']
+          )
+        );
+        this.workloadGroupList$.next(
+          this.#policyComparisonFacade.buildWorkloadGroupData(
+            res['WorkloadGroup']
+          )
+        );
+      });
+  }
+
+  /**
+   * @function onTabViewChange
+   * @param event
+   */
+  onTabViewChange(event: TabViewChangeEvent): void {
+    const { index } = event;
+    this.cols = this.#policyComparisonFacade.buildColumns(index);
+  }
+}
