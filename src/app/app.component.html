@@ -1,7 +1,198 @@
-
-<div class="container">
-  <div class="col-lg-12">
-    <h1 class="bd-title" id="content">Products</h1><br />
-    <app-get-complete>loading</app-get-complete>
+<div
+  [ngClass]="
+    styleClass
+      ? 'dofin-card card relative ' + styleClass
+      : 'dofin-card relative card'
+  "
+>
+  <div *ngIf="sendAttachmentLoading" class="mask-loading">
+    <div class="loader">
+      <p-progressSpinner aria-label="Loading"></p-progressSpinner>
+    </div>
+  </div>
+  <div class="dofin-card-header">
+    <h4 class="mb-2">Attachment</h4>
+    <p *ngIf="displaySendAttachmentButton" class="mb-3">
+      To complete your request, you must add the following documents.
+    </p>
+  </div>
+  <div class="dofin-card-body">
+    <div class="dofin-card-content grid">
+      <div class="field col-12 sm:col-6 md:col-6">
+        <label> Architecture diagram </label>
+        <ng-container *ngIf="displaySendAttachmentButton; else viewMode">
+          <p-fileUpload
+            (onSelect)="onBuildDataToSend('architecture', $event)"
+            *ngIf="displaySendAttachmentButton"
+            [chooseLabel]="
+              dofTicketAttachment?.architecture_diagram_file
+                ? 'Modify file'
+                : 'Add file'
+            "
+            [fileLimit]="1"
+            [maxFileSize]="4000000"
+            [multiple]="false"
+            accept=".pdf,.doc,.docx,.xls,.jpg,.png"
+            chooseIcon="pi-file"
+            mode="basic"
+            styleClass="p-button-outlined"
+            uploadIcon="pi-file"
+          ></p-fileUpload>
+          <span class="block font-light font-italic pt-3">
+            Accepted formats: .jpg .png .pdf .docx .xls. File size : 4Mo
+          </span>
+        </ng-container>
+        <ng-template #viewMode>
+          <div
+            *ngIf="dofTicketAttachment?.architecture_diagram_file"
+            [class]="displaySendAttachmentButton ? 'mt-2' : 'mb-2'"
+            id="download-architecturDiagramFile"
+          >
+            <a
+              [href]="dofTicketAttachment['architecture_diagram_file']"
+              class="p-element p-ripple p-button p-button-outlined p-component"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <span
+                class="p-button-icon p-button-icon-left pi pi-download"
+              ></span>
+              <span class="p-button-label">Download</span>
+            </a>
+          </div>
+          <small
+            *ngIf="
+              !dofTicketAttachment?.architecture_diagram_file &&
+              !displaySendAttachmentButton
+            "
+            class="font-italic block"
+            >No file</small
+          >
+        </ng-template>
+      </div>
+      <div class="field col-12 sm:col-6 md:col-6">
+        <label>Exemption</label>
+        <ng-container *ngIf="displaySendAttachmentButton; else viewMode">
+          <div>
+            <p class="font-light font-italic mb-3">
+              Do you want to add an exemption?
+            </p>
+            <div class="flex flex-wrap gap-3">
+              <dofin-radiobutton
+                *ngFor="let exemptionReqOption of exemptionRequestedOptions"
+                (radioChange)="onExemptionRequested($event)"
+                [ngModel]="exemptionConf.exemptionRequested"
+                radioGroupName="exemptionRequested"
+                [radioLabel]="exemptionReqOption.label"
+                [radioValue]="exemptionReqOption.value"
+              ></dofin-radiobutton>
+            </div>
+            <div
+              [ngClass]="
+                exemptionConf.exemptionRequested === 'true' ? 'block' : 'hidden'
+              "
+            >
+              <p class="font-light font-italic mb-3">
+                How do you want to add the file?
+              </p>
+              <div class="flex flex-wrap gap-3">
+                <dofin-radiobutton
+                  *ngFor="let exemptionOption of exemptionOptions"
+                  (radioChange)="onExemptionOptions($event)"
+                  radioGroupName="exemptionOptions"
+                  [radioLabel]="exemptionOption.label"
+                  [radioValue]="exemptionOption.value"
+                ></dofin-radiobutton>
+              </div>
+            </div>
+            <div
+              [ngClass]="
+                exemptionConf.exemptionSelected === ExemptionEnum.drive.value
+                  ? 'block'
+                  : 'hidden'
+              "
+            >
+              <p-fileUpload
+                (onSelect)="onBuildDataToSend('exemption', $event)"
+                [chooseLabel]="
+                  dofTicketAttachment?.exemption_file
+                    ? 'Modify file'
+                    : 'Add file'
+                "
+                [fileLimit]="1"
+                [maxFileSize]="4000000"
+                [multiple]="false"
+                accept=".pdf,.doc,.docx,.xls,.jpg,.png"
+                chooseIcon="pi-file"
+                mode="basic"
+                styleClass="p-button-outlined"
+                uploadIcon="pi-file"
+              ></p-fileUpload>
+              <span class="block font-light font-italic pt-3">
+                Accepted formats: .jpg .png .pdf .docx .xls. File size : 4Mo
+              </span>
+            </div>
+            <div
+              [ngClass]="
+                exemptionConf.exemptionSelected ===
+                ExemptionEnum.exemptionTicket.value
+                  ? 'block'
+                  : 'hidden'
+              "
+            >
+              <input
+                #inputExemptionTicket
+                (input)="addExemptionTicket.emit(inputExemptionTicket.value)"
+                class="w-full"
+                id="exemptionTicketNumber"
+                pInputText
+                type="text"
+                maxlength="16"
+                placeholder="DRG-PUB003 ticket number"
+              />
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #viewMode>
+          <div
+            [class]="displaySendAttachmentButton ? 'mt-2' : 'mb-2'"
+            id="download-exemptionFile"
+            *ngIf="dofTicketAttachment?.exemption_file"
+          >
+            <a
+              [href]="dofTicketAttachment['exemption_file']"
+              class="p-element p-ripple p-button p-button-outlined p-component"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <span
+                class="p-button-icon p-button-icon-left pi pi-download"
+              ></span>
+              <span class="p-button-label">Download</span>
+            </a>
+          </div>
+          <small
+            *ngIf="
+              !dofTicketAttachment?.exemption_file &&
+              !displaySendAttachmentButton
+            "
+            class="font-italic block"
+            >No file</small
+          >
+        </ng-template>
+      </div>
+      <div
+        *ngIf="displaySendAttachmentButton"
+        class="col-12 sm:col-12 md:col-12 text-left sm:text-left md:text-right lg:text-right xl:text-right"
+      >
+        <p-button
+          (onClick)="onUploadFile()"
+          [loading]="sendAttachmentLoading"
+          icon="pi pi-upload"
+          label="Send file"
+          styleClass="font-light"
+        ></p-button>
+      </div>
+    </div>
   </div>
 </div>
