@@ -1,0 +1,279 @@
+{
+    "root": true,
+    "ignorePatterns": ["**/*"],
+    "extends": [
+      "plugin:@typescript-eslint/recommended",
+      "plugin:prettier/recommended"
+    ],
+    "plugins": ["@nx", "@typescript-eslint", "prettier"],
+    "overrides": [
+      {
+        "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+        "rules": {
+          "@nx/enforce-module-boundaries": [
+            "error",
+            {
+              "enforceBuildableLibDependency": true,
+              "allow": [],
+              "depConstraints": [
+                {
+                  "sourceTag": "type:app",
+                  "onlyDependOnLibsWithTags": [
+                    "type:api",
+                    "type:feature",
+                    "type:ui",
+                    "type:domain-logic",
+                    "type:util"
+                  ]
+                },
+                {
+                  "sourceTag": "type:api",
+                  "onlyDependOnLibsWithTags": [
+                    "type:ui",
+                    "type:domain-logic",
+                    "type:util"
+                  ]
+                },
+                {
+                  "sourceTag": "type:feature",
+                  "onlyDependOnLibsWithTags": [
+                    "type:ui",
+                    "type:feature",
+                    "type:domain-logic",
+                    "type:util"
+                  ]
+                },
+                {
+                  "sourceTag": "type:ui",
+                  "onlyDependOnLibsWithTags": [
+                    "type:domain-logic",
+                    "type:util",
+                    "type:ui"
+                  ]
+                },
+                {
+                  "sourceTag": "type:domain-logic",
+                  "onlyDependOnLibsWithTags": ["domain:shared", "type:util"]
+                },
+                {
+                  "sourceTag": "domain:shared",
+                  "onlyDependOnLibsWithTags": ["domain:shared"]
+                },
+                {
+                  "sourceTag": "domain:run",
+                  "onlyDependOnLibsWithTags": ["domain:run", "domain:shared"]
+                },
+                {
+                  "sourceTag": "domain:control",
+                  "onlyDependOnLibsWithTags": ["domain:control", "domain:shared"]
+                },
+                {
+                  "sourceTag": "domain:firewalls",
+                  "onlyDependOnLibsWithTags": [
+                    "domain:firewalls",
+                    "domain:shared"
+                  ]
+                },
+                {
+                  "sourceTag": "domain:dbo",
+                  "onlyDependOnLibsWithTags": ["domain:dbo", "domain:shared"]
+                },
+                {
+                  "sourceTag": "domain:dof",
+                  "onlyDependOnLibsWithTags": ["domain:dof", "domain:shared"]
+                },
+                {
+                  "sourceTag": "domain:dof",
+                  "onlyDependOnLibsWithTags": ["domain:dof", "domain:shared"]
+                },
+                {
+                  "sourceTag": "domain:architecture",
+                  "onlyDependOnLibsWithTags": [
+                    "domain:architecture",
+                    "domain:shared"
+                  ]
+                },
+                {
+                  "sourceTag": "domain:cloud",
+                  "onlyDependOnLibsWithTags": ["domain:cloud", "domain:shared"]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "files": ["*.js", "*.jsx"],
+        "extends": ["plugin:@nx/javascript"],
+        "rules": {}
+      },
+      {
+        "files": ["*.ts"],
+        "extends": [
+          "eslint:recommended",
+          "plugin:@nx/angular",
+          "plugin:@angular-eslint/recommended",
+          "plugin:@angular-eslint/template/process-inline-templates",
+          "plugin:@nx/typescript",
+          "plugin:@typescript-eslint/recommended",
+          "plugin:prettier/recommended"
+        ],
+        "plugins": ["@typescript-eslint", "@angular-eslint", "prettier"],
+        "parser": "@typescript-eslint/parser",
+        "parserOptions": {
+          "project": ["tsconfig.base.json"],
+          "createDefaultProgram": true
+        },
+        "rules": {
+          "arrow-body-style": "error",
+          "constructor-super": "error",
+          "eqeqeq": ["error", "smart"],
+          "guard-for-in": "error",
+          "id-blacklist": "off",
+          "id-match": "off",
+          "dot-notation": "off",
+          "no-bitwise": "error",
+          "no-caller": "error",
+          "no-console": [
+            "error",
+            {
+              "allow": [
+                "log",
+                "warn",
+                "dir",
+                "timelog",
+                "assert",
+                "clear",
+                "count",
+                "countReset",
+                "group",
+                "groupEnd",
+                "table",
+                "dirxml",
+                "error",
+                "groupCollapsed",
+                "Console",
+                "profile",
+                "profileEnd",
+                "timeStamp",
+                "context"
+              ]
+            }
+          ],
+          "no-debugger": "error",
+          "no-empty": "error",
+          "no-empty-function": "off",
+          "no-eval": "error",
+          "no-restricted-imports": ["error", "rxjs/Rx"],
+          "no-undef-init": "error",
+          "no-underscore-dangle": "off",
+          "no-var": "error",
+          "semi": ["error", "always"],
+          "no-extra-semi": "off",
+          "prefer-const": "error",
+          "radix": "error",
+          "@angular-eslint/component-selector": [
+            "error",
+            {
+              "type": "element",
+              "prefix": "su7",
+              "style": "kebab-case"
+            }
+          ],
+          "@angular-eslint/directive-selector": [
+            "error",
+            {
+              "type": "attribute",
+              "prefix": "su7",
+              "style": "camelCase"
+            }
+          ],
+          "@angular-eslint/no-conflicting-lifecycle": "error",
+          "@angular-eslint/no-host-metadata-property": "error",
+          "@angular-eslint/no-input-rename": "error",
+          "@angular-eslint/no-inputs-metadata-property": "error",
+          "@angular-eslint/no-output-native": "error",
+          "@angular-eslint/no-output-on-prefix": "error",
+          "@angular-eslint/no-output-rename": "error",
+          "@angular-eslint/no-outputs-metadata-property": "error",
+          "@angular-eslint/use-lifecycle-interface": "error",
+          "@angular-eslint/use-pipe-transform-interface": "error",
+          "@typescript-eslint/consistent-type-imports": [
+            "error",
+            {
+              "prefer": "no-type-imports"
+            }
+          ],
+          "@typescript-eslint/explicit-member-accessibility": ["off"],
+          "@typescript-eslint/naming-convention": [
+            "error",
+            {
+              "selector": "enumMember",
+              "format": ["PascalCase"]
+            },
+            {
+              "selector": "interface",
+              "format": ["PascalCase"]
+            }
+          ],
+          "@typescript-eslint/no-empty-function": [
+            "error",
+            {
+              "allow": [
+                "constructors",
+                "private-constructors",
+                "protected-constructors",
+                "decoratedFunctions"
+              ]
+            }
+          ],
+          "@typescript-eslint/no-empty-interface": [
+            "error",
+            {
+              "allowSingleExtends": false
+            }
+          ],
+          "@typescript-eslint/no-inferrable-types": [
+            "error",
+            {
+              "ignoreParameters": true
+            }
+          ],
+          "@typescript-eslint/no-extra-semi": ["error"],
+          "@typescript-eslint/explicit-function-return-type": "error",
+          "@typescript-eslint/no-misused-new": "error",
+          "@typescript-eslint/no-non-null-assertion": "warn",
+          "@typescript-eslint/no-shadow": [
+            "error",
+            {
+              "hoist": "all"
+            }
+          ],
+          "@typescript-eslint/no-unused-expressions": "error",
+          "@typescript-eslint/prefer-function-type": "error",
+          "@typescript-eslint/unified-signatures": "error",
+          "prettier/prettier": "warn"
+        }
+      },
+      {
+        "files": ["*.html"],
+        "extends": ["plugin:@angular-eslint/template/recommended"],
+        "rules": {}
+      },
+      {
+        "files": ["*.html"],
+        "excludedFiles": ["*inline-template-*.component.html"],
+        "extends": ["plugin:prettier/recommended"],
+        "plugins": ["prettier"],
+        "rules": {
+          "prettier/prettier": [
+            "warn",
+            {
+              "parser": "angular"
+            }
+          ]
+        }
+      }
+    ]
+  }
+  

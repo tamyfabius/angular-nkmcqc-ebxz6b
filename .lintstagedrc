@@ -1,0 +1,3 @@
+{
+   "**/*.+(js|ts|component.html)": ["npx nx affected:lint --fix --cache --files","npx nx format:write --cache --files"]
+}
